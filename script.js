@@ -1,5 +1,6 @@
 const canvas = document.getElementById("visualizer");
 const ctx = canvas.getContext("2d");
+const overlay = document.getElementById("overlay");
 resizeCanvas();
 
 let audioCtx, analyser, source;
@@ -40,7 +41,7 @@ fileInput.addEventListener("change", () => {
 
     const audio = new Audio(URL.createObjectURL(file));
     audio.controls = true;
-    document.body.appendChild(audio);
+    overlay.appendChild(audio);
     audio.play();
 
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -61,25 +62,39 @@ fileInput.addEventListener("change", () => {
         ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i];
+            ctx.fillStyle = `rgb(50,${barHeight + 100},130)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
+        }
+
         const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
+        const centerY = canvas.height / 3;
 
         dataArray.forEach((value, i) => {
-            // lower threshold for more particles
             if (value > 50) {
                 const bassBoost = i < bufferLength / 4 ? 2 : 1;
                 const angle = Math.random() * Math.PI * 2;
                 const speed = (value / 45) * bassBoost;
 
-                // make alpha depend on volume and frequency
+                // alpha depends on volume and frequency
                 const freqFactor = i / bufferLength;
                 const initialAlpha = Math.min(1, (value / 200) * freqFactor + 0.2);
+
+                // base hue
+                const baseHue = 140;
+                const hueOffset = (i / bufferLength) * 40 - 20;
+                const color = `hsl(${baseHue + hueOffset}, 80%, 50%)`;
 
                 const p = new Particle(
                     centerX,
                     centerY,
-                    Math.random() * (bassBoost*1.5) + 2,
-                    `hsl(${i * 3}, 100%, 50%)`,
+                    Math.random() * (bassBoost * 1.5) + 2,
+                    color,
                     { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed }
                 );
 
@@ -87,6 +102,7 @@ fileInput.addEventListener("change", () => {
                 particles.push(p);
             }
         });
+
 
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
@@ -104,5 +120,5 @@ window.addEventListener("resize", resizeCanvas);
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.6;
+    canvas.height = window.innerHeight;
 }
