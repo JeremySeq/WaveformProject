@@ -58,33 +58,36 @@ fileInput.addEventListener("change", () => {
         requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        // dark translucent background for trails
         ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
-        // generate particles based on frequency
         dataArray.forEach((value, i) => {
-            if (value > 160) {
+            // lower threshold for more particles
+            if (value > 50) {
                 const bassBoost = i < bufferLength / 4 ? 2 : 1;
                 const angle = Math.random() * Math.PI * 2;
                 const speed = (value / 45) * bassBoost;
 
-                particles.push(
-                    new Particle(
-                        centerX,
-                        centerY,
-                        Math.random() * (bassBoost * 2) + 2,
-                        `hsl(${i * 3}, 100%, 50%)`,
-                        { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed }
-                    )
+                // make alpha depend on volume and frequency
+                const freqFactor = i / bufferLength;
+                const initialAlpha = Math.min(1, (value / 200) * freqFactor + 0.2);
+
+                const p = new Particle(
+                    centerX,
+                    centerY,
+                    Math.random() * (bassBoost*1.5) + 2,
+                    `hsl(${i * 3}, 100%, 50%)`,
+                    { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed }
                 );
+
+                p.alpha = initialAlpha;
+                particles.push(p);
             }
         });
 
-        // update and draw particles
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.update();
@@ -93,10 +96,10 @@ fileInput.addEventListener("change", () => {
         }
     }
 
+
     draw();
 });
 
-// keep canvas responsive
 window.addEventListener("resize", resizeCanvas);
 
 function resizeCanvas() {
