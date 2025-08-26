@@ -3,7 +3,12 @@ const ctx = canvas.getContext("2d");
 const overlay = document.getElementById("overlay");
 resizeCanvas();
 
-let audioCtx, analyser, source;
+// toggle between microphone or file input
+let useMic = false;
+
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let analyser;
+let source;
 const particles = [];
 
 class Particle {
@@ -33,24 +38,19 @@ class Particle {
     }
 }
 
-const fileInput = document.getElementById("fileInput");
-
-fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const audio = new Audio(URL.createObjectURL(file));
-    audio.controls = true;
-    overlay.appendChild(audio);
-    audio.play();
-
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function startVisualizer(streamOrAudioNode) {
     analyser = audioCtx.createAnalyser();
-    source = audioCtx.createMediaElementSource(audio);
-
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
     analyser.fftSize = 256;
+
+    if (streamOrAudioNode instanceof MediaStream) {
+        source = audioCtx.createMediaStreamSource(streamOrAudioNode);
+        source.connect(analyser);
+        // do NOT connect to destination to avoid echo
+    } else if (streamOrAudioNode instanceof AudioNode) {
+        source = streamOrAudioNode;
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination); // we want to hear the song
+    }
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -114,7 +114,45 @@ fileInput.addEventListener("change", () => {
 
 
     draw();
+}
+
+// mic input
+if (useMic) {
+    // wait for user gesture to unlock audio context
+    document.body.addEventListener('click', () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true });
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            startVisualizer(stream); // just visualize, don't connect to destination
+        })
+        .catch(err => console.error("Microphone capture failed:", err));
+}
+
+// file input
+fileInput.addEventListener("change", async () => {
+    if (useMic) return;
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const audio = new Audio(URL.createObjectURL(file));
+    audio.controls = true;
+    overlay.appendChild(audio);
+
+    // resume audio context on user gesture
+    await audioCtx.resume();
+
+    const audioSource = audioCtx.createMediaElementSource(audio);
+    audioSource.connect(audioCtx.destination);
+
+    startVisualizer(audioSource);
+
+    audio.play().catch(err => {
+        console.log("audio play failed, needs user gesture:", err);
+    });
 });
+
 
 window.addEventListener("resize", resizeCanvas);
 
