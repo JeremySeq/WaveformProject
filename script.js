@@ -38,6 +38,13 @@ class Particle {
     }
 }
 
+// ~ big brain stuff here ~
+// distributed but consistent angle
+function getAngleForIndex(i) {
+    const goldenRatio = 0.61803398875; // <- irrational number for distribution
+    return ((i * goldenRatio) % 1) * Math.PI * 2;
+}
+
 function startVisualizer(streamOrAudioNode) {
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
@@ -49,7 +56,7 @@ function startVisualizer(streamOrAudioNode) {
     } else if (streamOrAudioNode instanceof AudioNode) {
         source = streamOrAudioNode;
         source.connect(analyser);
-        analyser.connect(audioCtx.destination); // we want to hear the song
+        analyser.connect(audioCtx.destination); // play the song
     }
 
     const bufferLength = analyser.frequencyBinCount;
@@ -78,7 +85,7 @@ function startVisualizer(streamOrAudioNode) {
         dataArray.forEach((value, i) => {
             if (value > 50) {
                 const bassBoost = i < bufferLength / 4 ? 2 : 1;
-                const angle = Math.random() * Math.PI * 2;
+                const angle = getAngleForIndex(i);
                 const speed = (value / 45) * bassBoost;
 
                 // alpha depends on volume and frequency
@@ -109,9 +116,10 @@ function startVisualizer(streamOrAudioNode) {
             p.update();
             p.draw(ctx);
             if (p.alpha <= 0) particles.splice(i, 1);
+            // because it's at exactly 0, it creates full alpha particles at the very end of its lifetime
+            // it was a mistake, but it looks cooler this way
         }
     }
-
 
     draw();
 }
