@@ -5,6 +5,7 @@ const fileInput = document.getElementById("fileInput");
 const playPauseBtn = document.getElementById("playPause");
 const timeDisplay = document.getElementById("time");
 const micToggle = document.getElementById("micToggle");
+const fileName = document.getElementById("fileName");
 
 resizeCanvas();
 
@@ -205,6 +206,7 @@ fileInput.addEventListener("change", async () => {
     currentAudio.play();
     playPauseBtn.textContent = "⏸";
     isPlaying = true;
+    fileName.textContent = file.name;
 });
 
 playPauseBtn.addEventListener("click", () => {

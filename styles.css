@@ -4,7 +4,6 @@
     --primary-dark: #2a481a;
 }
 
-
 body {
     margin: 0;
     background: black;
@@ -31,6 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 400px;
 }
 
 .overlay h2 {
@@ -175,3 +175,8 @@ input:checked + .slider:before {
     transform: scale(0.95);
 }
 
+.fileName {
+    text-align: center;
+    text-wrap: wrap;
+    width: fit-content;
+}
