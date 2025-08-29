@@ -1,14 +1,51 @@
 const canvas = document.getElementById("visualizer");
 const ctx = canvas.getContext("2d");
 const overlay = document.getElementById("overlay");
+const fileInput = document.getElementById("fileInput");
+const playPauseBtn = document.getElementById("playPause");
+const timeDisplay = document.getElementById("time");
+const micToggle = document.getElementById("micToggle");
+
 resizeCanvas();
 
 // toggle between microphone or file input
 let useMic = false;
 
+micToggle.addEventListener("change", async () => {
+    useMic = micToggle.checked;
+    console.log("Use mic:", useMic);
+
+    if (useMic) {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            isPlaying = false;
+            playPauseBtn.textContent = "▶";
+            timeDisplay.textContent = "0:00 / 0:00";
+        }
+
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => startVisualizer(stream))
+            .catch(err => console.error("Microphone capture failed:", err));
+
+    } else {
+        console.log("Microphone disabled.");
+
+        if (source && source.mediaStream) {
+            source.mediaStream.getTracks().forEach(track => track.stop());
+        }
+
+        source = null;
+    }
+});
+
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let analyser;
 let source;
+let currentAudio = null;
+let isPlaying = false;
 const particles = [];
 
 class Particle {
@@ -141,9 +178,17 @@ fileInput.addEventListener("change", async () => {
     const file = fileInput.files[0];
     if (!file) return;
 
+    // stop previous audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        isPlaying = false;
+        playPauseBtn.textContent = "▶";
+        timeDisplay.textContent = "0:00 / 0:00";
+    }
+
     const audio = new Audio(URL.createObjectURL(file));
-    audio.controls = true;
-    overlay.appendChild(audio);
+    currentAudio = audio;
 
     // resume audio context on user gesture
     await audioCtx.resume();
@@ -153,11 +198,34 @@ fileInput.addEventListener("change", async () => {
 
     startVisualizer(audioSource);
 
-    audio.play().catch(err => {
-        console.log("audio play failed, needs user gesture:", err);
+    // update time
+    audio.addEventListener("timeupdate", () => {
+        timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
     });
+    currentAudio.play();
+    playPauseBtn.textContent = "⏸";
+    isPlaying = true;
 });
 
+playPauseBtn.addEventListener("click", () => {
+    if (!currentAudio) return;
+    if (currentAudio.paused) {
+        currentAudio.play();
+        playPauseBtn.textContent = "⏸";
+        isPlaying = true;
+    } else {
+        currentAudio.pause();
+        playPauseBtn.textContent = "▶";
+        isPlaying = false;
+    }
+});
+
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+}
 
 window.addEventListener("resize", resizeCanvas);
 

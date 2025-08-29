@@ -9,7 +9,24 @@
 <body>
   <div class="overlay" id="overlay">
     <h2>Audio Visualizer</h2>
-    <input type="file" id="fileInput" accept="audio/*" />
+    <div class="audioInputSwitch">
+      <p>use mic</p>
+      <label class="switch">
+        <input type="checkbox" id="micToggle">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="fileInput">
+      <input type="file" id="fileInput" accept="audio/*">
+      <label for="fileInput">Choose Audio File</label>
+    </div>
+
+    <div id="customPlayer" class="player">
+      <button id="playPause">▶</button>
+      <span id="time">0:00 / 0:00</span>
+    </div>
+
   </div>
 
   <canvas id="visualizer"></canvas>

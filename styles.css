@@ -1,3 +1,10 @@
+:root {
+    --primary: lawngreen;
+    --primary-light: #b0ee74;
+    --primary-dark: #2a481a;
+}
+
+
 body {
     margin: 0;
     background: black;
@@ -16,6 +23,20 @@ body {
     z-index: 10;
     top: 0;
     left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid gray;
+    border-radius: 15px;
+    padding: 10px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.overlay h2 {
+    line-height: 1;
+    text-align: center;
+    margin: 10px 10px 20px;
 }
 
 canvas {
@@ -28,3 +49,129 @@ canvas {
 input {
     margin-top: 20px;
 }
+
+.audioInputSwitch {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--primary-dark);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: black;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--primary);
+}
+
+input:checked + .slider:before {
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.fileInput {
+    position: relative;
+    display: inline-block;
+    margin: 20px
+}
+
+.fileInput input[type="file"] {
+    position: absolute;
+    left: -9999px;
+}
+
+.fileInput label {
+    background: var(--primary);
+    color: black;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.fileInput label:hover {
+    background: var(--primary-light);
+    transform: scale(1.05);
+}
+
+.fileInput label:active {
+    transform: scale(0.98);
+}
+
+.player {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+.player button {
+    background: var(--primary);
+    color: black;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.player button:hover {
+    background: var(--primary-light);
+    transform: scale(1.05);
+}
+
+.player button:active {
+    transform: scale(0.95);
+}
+
