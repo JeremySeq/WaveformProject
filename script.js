@@ -71,7 +71,7 @@ function startVisualizer(streamOrAudioNode) {
 
         for (let i = 0; i < bufferLength; i++) {
             const barHeight = dataArray[i];
-            ctx.fillStyle = `rgb(50,${barHeight + 100},130)`;
+            ctx.fillStyle = `rgb(50,${barHeight + 100},100)`;
             ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
             x += barWidth + 1;
         }
