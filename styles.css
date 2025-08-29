@@ -22,15 +22,15 @@ body {
     z-index: 10;
     top: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 2px solid gray;
+    background-color: black;
+    border: 2px solid var(--primary-light);
     border-radius: 15px;
-    padding: 10px;
+    padding: 20px;
     margin: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 400px;
+    width: 350px;
 }
 
 .overlay h2 {
@@ -96,10 +96,6 @@ input {
 
 input:checked + .slider {
     background-color: var(--primary);
-}
-
-input:focus + .slider {
-    box-shadow: 0 0 1px var(--primary);
 }
 
 input:checked + .slider:before {
