@@ -51,13 +51,10 @@ function startVisualizer(streamOrAudioNode) {
 
     if (streamOrAudioNode instanceof MediaStream) {
         source = audioCtx.createMediaStreamSource(streamOrAudioNode);
-        source.connect(analyser);
-        // do NOT connect to destination to avoid echo
     } else if (streamOrAudioNode instanceof AudioNode) {
         source = streamOrAudioNode;
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination); // play the song
     }
+    source.connect(analyser);
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
